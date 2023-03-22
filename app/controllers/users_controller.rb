@@ -4,28 +4,28 @@ class UsersController < ApplicationController
   before_action :authorize!, except: [:create]
 
   def index
-    return render :json => {success: false, errors: "Not authorized"} unless isAdmin()
+    return render :json => {success: false, errors: "Not authorized"} unless is_admin()
     users = User.all
-    render :json => users.to_json.camelize
+    render :json => users.to_json
   end
 
   def show
-    return render :json => {success: false, errors: "Not authorized"} unless canAccess(params[:id])
+    return render :json => {success: false, errors: "Not authorized"} unless can_access(params[:id])
 
     user = User.find_by(auth0_id: params[:id])
-    render :json => user.to_json.camelize
+    render :json => user.to_json
   end
 
   def create
-    if canCreateUser(request.headers['Authorization'])
-      handleUserCreation(params[:params][:user])
+    if can_create(request.headers['Authorization'])
+      handle_user_creation(params[:params][:user])
     else 
-      render :json => {success: true, user: user}.to_json.camelize
+      render :json => {success: true, user: user}.to_json
     end
   end
 
   def update
-    return render :json => {success: false, errors: "Not authorized"} unless canUpdate(params[:id])
+    return render :json => {success: false, errors: "Not authorized"} unless can_update(params[:id])
 
     user = User.find_by(auth0_id: params[:id])
 
@@ -33,46 +33,52 @@ class UsersController < ApplicationController
       return render :json => {success: false, errors: "User not found"}
     end
 
-    handleUserUpdate(user, params)
+    handle_user_update(user, params)
   end
 
 
   private
 
 
-  def canAccess(userId)
-    return isManager() || @token['sub'] == userId
+  def can_access(userId)
+    return is_manager() || @token['sub'] == userId
   end
 
-  def canUpdate(userId)
-    return isAdmin() || @token['sub'] == userId
+  def can_update(userId)
+    return is_admin() || @token['sub'] == userId
   end
 
-  def canCreateUser(authorizationBearer)
+  def can_create(authorizationBearer)
     webhookToken = authorizationBearer.split.last if authorizationBearer.present?
     ENV["AUTH0_WEBHOOK_TOKEN"] == webhookToken
   end
 
-  def handleUserCreation(params)
+  def handle_user_creation(params)
     user = User.new({auth0_id: params[:user_id], email: params[:email]})
 
     if user.save
-      render :json => {success: true, user: user}.to_json.camelize
+      render :json => {success: true, user: user}.to_json
     else
       render :json => {success: false, errors: user.errors}
     end
   end
 
-  def handleUserUpdate(user, params)
-    user.firstname = params[:firstname] if params[:firstname].present?
-    user.lastname = params[:lastname] if params[:lastname].present?
-    user.terms_and_conditions = params[:termsAndConditions] if params[:termsAndConditions].present?
+  def handle_user_update(user, params)
+    update_user_params = update_user_params(params)
     
-    if user.save
-      render :json => {success: true, user: user}.to_json.camelize
+    if user.update(update_user_params)
+      render :json => {success: true, user: user}.to_json
     else
       render :json => {success: false, errors: user.errors}
     end
+  end
+
+  def create_user_params(params)
+    params.require(:user).permit(:auth0_id, :email)
+  end
+
+  def update_user_params(params)
+    params.require(:user).permit(:firstname, :lastname, :terms_and_conditions)
   end
 
 end
