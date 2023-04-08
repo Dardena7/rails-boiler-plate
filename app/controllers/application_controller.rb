@@ -8,17 +8,17 @@ class ApplicationController < ActionController::API
   end
 
   def is_super_admin
-    roles = @token['http://boiler-plate-api.com/roles'] & ["superadmin"]
+    roles = @token["#{ENV['API_AUDIENCE']}/roles"] & ["superadmin"]
     return roles.any?
   end
 
   def is_admin
-    roles = @token['http://boiler-plate-api.com/roles'] & ["superadmin", "admin"]
+    roles = @token["#{ENV['API_AUDIENCE']}/roles"] & ["superadmin", "admin"]
     return roles.any?
   end
 
   def is_manager
-    roles = @token['http://boiler-plate-api.com/roles'] & ["superadmin", "admin", "manager"]
+    roles = @token["#{ENV['API_AUDIENCE']}/roles"] & ["superadmin", "admin", "manager"]
     return roles.any?
   end
 
