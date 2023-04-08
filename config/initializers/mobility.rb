@@ -80,7 +80,7 @@ Mobility.configure do
     # 'foo'+ sets a default translation string to show in case no translation is
     # present. Can also be passed a proc.
     #
-    # default 'foo'
+    default '- Translation Missing -'
 
     # Fallthrough Accessors
     #
