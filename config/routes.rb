@@ -6,4 +6,5 @@ Rails.application.routes.draw do
   resources :users
   resources :products
   resources :categories
+  post "/files", to: "files#create"
 end

@@ -172,6 +172,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  activestorage
   bootsnap
   debug
   dotenv-rails

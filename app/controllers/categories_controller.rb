@@ -1,7 +1,7 @@
 require 'active_support/core_ext/hash/keys'
 
 class CategoriesController < ApplicationController
-  include Translations
+  include TranslationsUtils
   before_action :authorize!, only: [:create, :update]
 
   def index

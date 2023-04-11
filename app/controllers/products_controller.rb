@@ -1,7 +1,8 @@
 require 'active_support/core_ext/hash/keys'
 
 class ProductsController < ApplicationController
-  include Translations
+  include TranslationsUtils
+  include FilesUtils
   before_action :authorize!, only: [:create, :update]
 
   def index
@@ -19,8 +20,8 @@ class ProductsController < ApplicationController
     Mobility.with_locale(locale) do
       product = Product.find(params[:id])
       translations = get_translations(product)
-
-      render :json => product.as_json(:include => [:categories]).merge(translations: translations)
+      images = get_images(product)
+      render :json => product.as_json(:include => [:categories]).merge(translations: translations, images: images)
     end
   end
 
@@ -46,8 +47,11 @@ class ProductsController < ApplicationController
   private
 
   def handle_product_edition(product, params)
+    pp "edition"
+    pp params
     set_translations(product, params)
     product.categories = Category.where(id: params[:categories]) unless !params.has_key?(:categories)
+    update_images(product, params[:image_ids])
 
     if product.save
       render :json => {success: true, product: product}.to_json
@@ -57,7 +61,21 @@ class ProductsController < ApplicationController
   end
 
   def product_params(params)
-    params.permit(name: {}, categories: [])
+    params.permit(name: {}, categories: [], image_ids: [])
+  end
+
+  def get_images(product)
+    return product.images.map do |image|
+      {
+        id: image.id,
+        url: rails_blob_url(image)
+      }
+    end
+  end
+
+  def update_images(product, image_ids)
+    detach_files(product.images, image_ids)
+    attach_files(product.images, image_ids)
   end
 
 end

@@ -1,4 +1,4 @@
-module Translations
+module TranslationsUtils
   extend ActiveSupport::Concern
 
   def get_translations(object)
@@ -16,6 +16,7 @@ module Translations
   def set_translations(object, params)
     Mobility.available_locales.each do |locale|
       object.class.mobility_attributes.each do |attribute|
+        next if !params[attribute].present?
         object.send("#{attribute}=", params[attribute][locale], locale: locale)
       end
     end
