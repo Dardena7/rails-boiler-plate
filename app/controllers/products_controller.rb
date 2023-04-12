@@ -47,8 +47,6 @@ class ProductsController < ApplicationController
   private
 
   def handle_product_edition(product, params)
-    pp "edition"
-    pp params
     set_translations(product, params)
     product.categories = Category.where(id: params[:categories]) unless !params.has_key?(:categories)
     update_images(product, params[:image_ids])
