@@ -4,7 +4,7 @@ class UsersController < ApplicationController
   before_action :authorize!, except: [:create]
 
   def index
-    return render :json => {success: false, errors: ["Not authorized"]} unless is_admin()
+    return render :json => {success: false, errors: ["Not authorized"]} unless is_admin?
     users = User.all
     render :json => users.to_json
   end
@@ -41,11 +41,11 @@ class UsersController < ApplicationController
 
 
   def can_access(userId)
-    return is_manager() || @token['sub'] == userId
+    return is_manager? || @token['sub'] == userId
   end
 
   def can_update(userId)
-    return is_admin() || @token['sub'] == userId
+    return is_admin? || @token['sub'] == userId
   end
 
   def can_create(authorizationBearer)
