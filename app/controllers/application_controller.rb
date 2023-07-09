@@ -7,19 +7,19 @@ class ApplicationController < ActionController::API
     @token ||= result
   end
 
-  def is_super_admin
+  def is_super_admin?
     roles = @token["#{ENV['API_AUDIENCE']}/roles"] & ["superadmin"]
-    return roles.any?
+    roles.any?
   end
 
-  def is_admin
+  def is_admin?
     roles = @token["#{ENV['API_AUDIENCE']}/roles"] & ["superadmin", "admin"]
-    return roles.any?
+    roles.any?
   end
 
-  def is_manager
+  def is_manager?
     roles = @token["#{ENV['API_AUDIENCE']}/roles"] & ["superadmin", "admin", "manager"]
-    return roles.any?
+    roles.any?
   end
 
   private
@@ -36,5 +36,4 @@ class ApplicationController < ActionController::API
 
     nil
   end
-
 end

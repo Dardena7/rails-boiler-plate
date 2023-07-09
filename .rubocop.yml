@@ -1,0 +1,16 @@
+# .rubocop.yml
+
+# Customize severity levels or exclude specific rules
+AllCops:
+  DisabledByDefault: true
+
+# Enable only syntax-related cops
+Lint/Syntax:
+  Enabled: true
+
+# Enable specific rules and adjust their severity levels
+Style/FrozenStringLiteralComment:
+  Enabled: false # Disable the "FrozenStringLiteralComment" rule
+
+Style/Documentation:
+  Enabled: false # Disable the "Documentation" rule

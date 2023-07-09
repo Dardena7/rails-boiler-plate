@@ -16,17 +16,11 @@ class ProductsController < ApplicationController
 
   def show
     locale = request.headers["Accept-Language"]  || I18n.locale
-
-    Mobility.with_locale(locale) do
-      product = Product.find(params[:id])
-      translations = get_translations(product)
-      images = get_images(product)
-      render :json => product.as_json(:include => [:categories]).merge(translations: translations, images: images)
-    end
+    render :json => get_product(params[:id], locale)
   end
 
   def create
-    return render :json => {success: false, errors: ["Not authorized"]} unless is_admin()
+    return render :json => {success: false, errors: ["Not authorized"]} unless is_admin?
     
     product = Product.new
     permitted_params = product_params(params)
@@ -34,7 +28,7 @@ class ProductsController < ApplicationController
   end
 
   def update
-    return render :json => {success: false, errors: ["Not authorized"]} unless is_admin()
+    return render :json => {success: false, errors: ["Not authorized"]} unless is_admin?
     
     product = Product.find(params[:id])
     return render :json => {success: false, errors: ["Product not found"]}.to_json unless product.present?
@@ -43,8 +37,43 @@ class ProductsController < ApplicationController
     handle_product_edition(product, permitted_params)
   end
 
+  def search
+    locale = request.headers["Accept-Language"]  || I18n.locale
+
+    query = params[:query]
+    sanitized_query = ActiveRecord::Base.sanitize_sql_like(query)
+
+    connection = ActiveRecord::Base.connection
+
+    sql = <<~SQL
+      SELECT DISTINCT translatable_id FROM mobility_string_translations
+      WHERE translatable_type = 'Product' AND locale = ? AND value LIKE ?
+    SQL
+
+    # Execute a raw SQL query to select all records from a table
+    result = connection.exec_query(sql, 'Product search', [locale, "%#{sanitized_query}%"])
+
+    products = []
+
+    result.each do |row|
+      product_id = row['translatable_id']
+      products.push(get_product(product_id, locale))
+    end
+
+    render :json => products.to_json
+  end
+
 
   private
+
+  def get_product(id, locale)
+    Mobility.with_locale(locale) do
+      product = Product.find(id)
+      translations = get_translations(product)
+      images = get_images(product)
+      product.as_json(:include => [:categories]).merge(translations: translations, images: images)
+    end
+  end
 
   def handle_product_edition(product, params)
     set_translations(product, params)

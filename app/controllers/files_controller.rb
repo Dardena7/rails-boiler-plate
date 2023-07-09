@@ -4,7 +4,7 @@ class FilesController < ApplicationController
   before_action :authorize!
 
   def create
-    return render :json => {success: false, errors: ["Not authorized"]} unless is_admin()
+    return render :json => {success: false, errors: ["Not authorized"]} unless is_admin?
 
     upload(params)
   end
