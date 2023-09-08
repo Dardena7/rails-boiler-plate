@@ -3,7 +3,7 @@ require 'active_support/core_ext/hash/keys'
 class ProductsController < ApplicationController
   include TranslationsUtils
   include FilesUtils
-  before_action :authorize!, only: [:create, :update]
+  before_action :authorize!, only: [:create, :update, :destroy]
 
   def index
     locale = request.headers["Accept-Language"]  || I18n.locale
@@ -24,6 +24,7 @@ class ProductsController < ApplicationController
     
     product = Product.new
     permitted_params = product_params(params)
+    pp "permitted_params: #{permitted_params}"
     handle_product_edition(product, permitted_params)
   end
 
@@ -35,6 +36,16 @@ class ProductsController < ApplicationController
     
     permitted_params = product_params(params)
     handle_product_edition(product, permitted_params)
+  end
+
+  def destroy
+    return render :json => {success: false, errors: ["Not authorized"]} unless is_admin?
+
+    product = Product.find(params[:id])
+    return render :json => {success: false, errors: ["Product not found"]}.to_json unless product.present?
+
+    product.delete
+    render :json => {success: true}.to_json
   end
 
   def search
@@ -57,6 +68,9 @@ class ProductsController < ApplicationController
 
     result.each do |row|
       product_id = row['translatable_id']
+      product = get_product(product_id, locale)
+      next if product.nil?
+
       products.push(get_product(product_id, locale))
     end
 
@@ -68,7 +82,9 @@ class ProductsController < ApplicationController
 
   def get_product(id, locale)
     Mobility.with_locale(locale) do
-      product = Product.find(id)
+      product = Product.find_by_id(id)
+      return nil if product.nil? 
+
       translations = get_translations(product)
       images = get_images(product)
       product.as_json(:include => [:categories]).merge(translations: translations, images: images)
@@ -88,7 +104,7 @@ class ProductsController < ApplicationController
   end
 
   def product_params(params)
-    params.permit(name: {}, categories: [], image_ids: [])
+    params.permit(name: {}, active: true, categories: [], image_ids: [])
   end
 
   def get_images(product)

@@ -1,5 +1,8 @@
 class Category < ApplicationRecord
   extend Mobility
+  include Mixins::Tombstoneable
+  include Mixins::Activatable
+  
   translates :name, presence: true, type: :string
 
   has_many :categories_products, class_name: 'CategoryProduct'

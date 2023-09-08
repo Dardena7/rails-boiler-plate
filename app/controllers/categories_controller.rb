@@ -2,7 +2,7 @@ require 'active_support/core_ext/hash/keys'
 
 class CategoriesController < ApplicationController
   include TranslationsUtils
-  before_action :authorize!, only: [:create, :update, :add_product, :remove_product, :move_product, :move_category]
+  before_action :authorize!, except: [:index, :show]
 
   def index
     locale = request.headers["Accept-Language"]  || I18n.locale
@@ -32,6 +32,16 @@ class CategoriesController < ApplicationController
     handle_category_edition(category, permitted_params)
   end
 
+  def destroy
+    return render :json => {success: false, errors: ["Not authorized"]} unless is_admin?
+
+    category = Category.find(params[:id])
+    return render :json => {success: false, errors: ["Category not found"]}.to_json unless category.present?
+
+    category.delete
+    render :json => {success: true}.to_json
+  end
+
   def update
     return render :json => {success: false, errors: ["Not authorized"]} unless is_admin?
     
@@ -39,6 +49,8 @@ class CategoriesController < ApplicationController
     return category_not_found() unless category.present?
     
     permitted_params = category_params(params)
+    pp "$$alex permitted_params: #{permitted_params}"
+
     handle_category_edition(category, permitted_params)
   end
 
@@ -131,6 +143,7 @@ class CategoriesController < ApplicationController
 
   def handle_category_edition(category, params)
     set_translations(category, params)
+    category.active = params[:active] unless !params.has_key?(:active)
 
     if category.save
       render :json => {success: true, category: category}.to_json
@@ -140,7 +153,7 @@ class CategoriesController < ApplicationController
   end
 
   def category_params(params)
-    params.require(:category).permit(name: {})
+    params.require(:category).permit(:active, name: {})
   end
 
 end

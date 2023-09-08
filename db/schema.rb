@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_07_09_205017) do
+ActiveRecord::Schema[7.0].define(version: 2023_09_08_230344) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -42,6 +42,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_09_205017) do
   create_table "categories", force: :cascade do |t|
     t.string "name"
     t.integer "position"
+    t.boolean "active", default: true, null: false
+    t.boolean "deleted", default: false, null: false
   end
 
   create_table "categories_products", force: :cascade do |t|
@@ -79,6 +81,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_07_09_205017) do
 
   create_table "products", force: :cascade do |t|
     t.string "name"
+    t.boolean "deleted", default: false, null: false
+    t.boolean "active", default: true, null: false
   end
 
   create_table "users", force: :cascade do |t|
