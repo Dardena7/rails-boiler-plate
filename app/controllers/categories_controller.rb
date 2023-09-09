@@ -2,6 +2,7 @@ require 'active_support/core_ext/hash/keys'
 
 class CategoriesController < ApplicationController
   include TranslationsUtils
+  include FilesUtils
   before_action :authorize!, except: [:index, :show]
 
   def index
@@ -19,8 +20,9 @@ class CategoriesController < ApplicationController
     Mobility.with_locale(locale) do
       category = Category.find(params[:id])
       translations = get_translations(category)
+      images = get_images(category)
 
-      render :json => category.as_json(:include => [:products]).merge(translations: translations)
+      render :json => category.as_json(:include => [:products]).merge(translations: translations, images: images)
     end
   end
 
@@ -47,10 +49,7 @@ class CategoriesController < ApplicationController
     
     category = find_category(params[:id])
     return category_not_found() unless category.present?
-    
     permitted_params = category_params(params)
-    pp "$$alex permitted_params: #{permitted_params}"
-
     handle_category_edition(category, permitted_params)
   end
 
@@ -143,6 +142,7 @@ class CategoriesController < ApplicationController
 
   def handle_category_edition(category, params)
     set_translations(category, params)
+    update_images(category, params[:image_ids]) unless !params.has_key?(:image_ids)
     category.active = params[:active] unless !params.has_key?(:active)
 
     if category.save
@@ -153,7 +153,21 @@ class CategoriesController < ApplicationController
   end
 
   def category_params(params)
-    params.require(:category).permit(:active, name: {})
+    params.permit(:active, name: {}, image_ids: [])
+  end
+
+  def get_images(category)
+    return category.images.map do |image|
+      {
+        id: category.id,
+        url: rails_blob_url(image)
+      }
+    end
+  end
+
+  def update_images(category, image_ids)
+    detach_files(category.images, image_ids)
+    attach_files(category.images, image_ids)
   end
 
 end

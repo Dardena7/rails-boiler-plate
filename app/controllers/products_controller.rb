@@ -24,7 +24,6 @@ class ProductsController < ApplicationController
     
     product = Product.new
     permitted_params = product_params(params)
-    pp "permitted_params: #{permitted_params}"
     handle_product_edition(product, permitted_params)
   end
 
@@ -94,7 +93,8 @@ class ProductsController < ApplicationController
   def handle_product_edition(product, params)
     set_translations(product, params)
     product.categories = Category.where(id: params[:categories]) unless !params.has_key?(:categories)
-    update_images(product, params[:image_ids])
+    product.active = params[:active] unless !params.has_key?(:active)
+    update_images(product, params[:image_ids]) unless !params.has_key?(:image_ids)
 
     if product.save
       render :json => {success: true, product: product}.to_json
@@ -104,7 +104,7 @@ class ProductsController < ApplicationController
   end
 
   def product_params(params)
-    params.permit(name: {}, active: true, categories: [], image_ids: [])
+    params.permit(:active, name: {}, categories: [], image_ids: [])
   end
 
   def get_images(product)
