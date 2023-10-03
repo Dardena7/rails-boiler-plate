@@ -3,14 +3,19 @@ require 'active_support/core_ext/hash/keys'
 class ProductsController < ApplicationController
   include TranslationsUtils
   include FilesUtils
+  include ObjectsUtils
   before_action :authorize!, only: [:create, :update, :destroy]
 
   def index
     locale = request.headers["Accept-Language"]  || I18n.locale
 
     Mobility.with_locale(locale) do
-      products = Product.all
-      render :json => products.to_json
+      products = []
+      Product.all.map do |product|
+        products.push(get_product(product.id, locale))
+      end
+
+      render :json => products.to_json(methods: [:price_as_float])
     end
   end
 
@@ -79,19 +84,9 @@ class ProductsController < ApplicationController
 
   private
 
-  def get_product(id, locale)
-    Mobility.with_locale(locale) do
-      product = Product.find_by_id(id)
-      return nil if product.nil? 
-
-      translations = get_translations(product)
-      images = get_images(product)
-      product.as_json(:include => [:categories]).merge(translations: translations, images: images)
-    end
-  end
-
   def handle_product_edition(product, params)
     set_translations(product, params)
+    product.price = params[:price] unless !params.has_key?(:price)
     product.categories = Category.where(id: params[:categories]) unless !params.has_key?(:categories)
     product.active = params[:active] unless !params.has_key?(:active)
     update_images(product, params[:image_ids]) unless !params.has_key?(:image_ids)
@@ -104,16 +99,7 @@ class ProductsController < ApplicationController
   end
 
   def product_params(params)
-    params.permit(:active, name: {}, categories: [], image_ids: [])
-  end
-
-  def get_images(product)
-    return product.images.map do |image|
-      {
-        id: image.id,
-        url: rails_blob_url(image)
-      }
-    end
+    params.permit(:active, :price, name: {}, categories: [], image_ids: [])
   end
 
   def update_images(product, image_ids)

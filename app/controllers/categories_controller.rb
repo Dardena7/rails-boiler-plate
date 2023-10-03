@@ -3,6 +3,7 @@ require 'active_support/core_ext/hash/keys'
 class CategoriesController < ApplicationController
   include TranslationsUtils
   include FilesUtils
+  include ObjectsUtils
   before_action :authorize!, except: [:index, :show]
 
   def index
@@ -21,8 +22,12 @@ class CategoriesController < ApplicationController
       category = Category.find(params[:id])
       translations = get_translations(category)
       images = get_images(category)
+      products = []
+      category.products.map do |product| 
+        products.push(get_product(product, locale)) 
+      end
 
-      render :json => category.as_json(:include => [:products]).merge(translations: translations, images: images)
+      render :json => category.as_json().merge(translations: translations, images: images, products: products)
     end
   end
 
@@ -154,15 +159,6 @@ class CategoriesController < ApplicationController
 
   def category_params(params)
     params.permit(:active, name: {}, image_ids: [])
-  end
-
-  def get_images(category)
-    return category.images.map do |image|
-      {
-        id: category.id,
-        url: rails_blob_url(image)
-      }
-    end
   end
 
   def update_images(category, image_ids)

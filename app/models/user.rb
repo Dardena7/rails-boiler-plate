@@ -3,6 +3,8 @@ class User < ApplicationRecord
   validates :email, presence: true, uniqueness: true
   validate :terms_and_conditions_true, on: :update
 
+  has_many :carts
+
   private
 
   def terms_and_conditions_true
