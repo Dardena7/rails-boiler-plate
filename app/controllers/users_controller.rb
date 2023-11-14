@@ -57,7 +57,6 @@ class UsersController < ApplicationController
     user = User.new({auth0_id: params[:user_id], email: params[:email]})
 
     if user.save
-      user.carts.create
       render :json => {success: true, user: user}.to_json
     else
       render :json => {success: false, errors: user.errors}.to_json

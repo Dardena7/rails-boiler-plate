@@ -6,6 +6,7 @@ class CartItem < ApplicationRecord
 
   before_save :calculate_total
   after_save :update_cart_total
+  after_destroy :update_cart_total
 
   def calculate_total
     self.total = quantity * product.price

@@ -1,9 +1,10 @@
 class Cart < ApplicationRecord
-  belongs_to :user
-  has_many :cart_items
+  belongs_to :user, optional: true
+  has_many :cart_items, dependent: :destroy
   has_many :products, through: :cart_items
 
   attribute :total, :decimal, precision: 10, scale: 2
+  attribute :uuid, :string
 
   def add_product(product, quantity)
     cart_item = cart_items.find_or_initialize_by(product: product)
