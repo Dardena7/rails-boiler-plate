@@ -4,6 +4,8 @@ class User < ApplicationRecord
   validate :terms_and_conditions_true, on: :update
 
   has_many :carts
+  has_many :orders
+  has_many :addresses
 
   private
 

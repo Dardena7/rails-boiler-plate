@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_11_13_215313) do
+ActiveRecord::Schema[7.0].define(version: 2023_11_24_170810) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -39,6 +39,18 @@ ActiveRecord::Schema[7.0].define(version: 2023_11_13_215313) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "addresses", force: :cascade do |t|
+    t.string "complete_name"
+    t.string "country"
+    t.string "street"
+    t.string "city"
+    t.string "zip"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id"
+    t.index ["user_id"], name: "index_addresses_on_user_id"
+  end
+
   create_table "cart_items", force: :cascade do |t|
     t.integer "cart_id", null: false
     t.integer "product_id", null: false
@@ -56,6 +68,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_11_13_215313) do
     t.datetime "updated_at", null: false
     t.decimal "total", precision: 10, scale: 2, default: "0.0"
     t.string "uuid"
+    t.boolean "completed", default: false
     t.index ["user_id"], name: "index_carts_on_user_id"
   end
 
@@ -99,6 +112,31 @@ ActiveRecord::Schema[7.0].define(version: 2023_11_13_215313) do
     t.index ["translatable_id", "translatable_type", "locale", "key"], name: "index_mobility_text_translations_on_keys", unique: true
   end
 
+  create_table "order_items", force: :cascade do |t|
+    t.integer "order_id", null: false
+    t.integer "product_id", null: false
+    t.integer "quantity"
+    t.decimal "price"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.decimal "total", precision: 10, scale: 2, default: "0.0"
+    t.index ["order_id"], name: "index_order_items_on_order_id"
+    t.index ["product_id"], name: "index_order_items_on_product_id"
+  end
+
+  create_table "orders", force: :cascade do |t|
+    t.integer "address_id", null: false
+    t.integer "user_id"
+    t.integer "cart_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "uuid"
+    t.decimal "total", precision: 10, scale: 2, default: "0.0"
+    t.index ["address_id"], name: "index_orders_on_address_id"
+    t.index ["cart_id"], name: "index_orders_on_cart_id"
+    t.index ["user_id"], name: "index_orders_on_user_id"
+  end
+
   create_table "products", force: :cascade do |t|
     t.string "name"
     t.boolean "deleted", default: false, null: false
@@ -119,9 +157,15 @@ ActiveRecord::Schema[7.0].define(version: 2023_11_13_215313) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "addresses", "users"
   add_foreign_key "cart_items", "carts"
   add_foreign_key "cart_items", "products"
   add_foreign_key "carts", "users"
   add_foreign_key "categories_products", "categories"
   add_foreign_key "categories_products", "products"
+  add_foreign_key "order_items", "orders"
+  add_foreign_key "order_items", "products"
+  add_foreign_key "orders", "addresses"
+  add_foreign_key "orders", "carts"
+  add_foreign_key "orders", "users"
 end

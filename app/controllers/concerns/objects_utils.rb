@@ -12,6 +12,18 @@ module ObjectsUtils
     end
   end
 
+  def get_cart_items(cart, locale)
+    cart.cart_items.includes(:product).map do |cart_item|
+      cart_item.as_json.merge(product: get_product(cart_item.product.id, locale))
+    end
+  end
+
+  def get_order_items(order, locale)
+    order.order_items.includes(:product).map do |order_item|
+      order_item.as_json.merge(product: get_product(order_item.product.id, locale))
+    end
+  end
+
   private
 
   def get_images(object)

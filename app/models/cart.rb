@@ -5,6 +5,7 @@ class Cart < ApplicationRecord
 
   attribute :total, :decimal, precision: 10, scale: 2
   attribute :uuid, :string
+  attribute :completed, :boolean
 
   def add_product(product, quantity)
     cart_item = cart_items.find_or_initialize_by(product: product)

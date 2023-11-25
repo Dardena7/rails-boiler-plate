@@ -19,6 +19,9 @@ Rails.application.routes.draw do
   patch "carts/remove_from_cart", to: "carts#remove_from_cart", as: "remove_product_from_cart"
   patch "carts/merge_cart", to: "carts#merge_cart", as: "merge_products_to_cart"
   resources :carts
+
+  get "orders/order_confirmation", to: "orders#order_confirmation", as: "order_confirmation"
+  resources :orders, only: [:index, :show, :create]
   
   post "/files", to: "files#create"
 end
