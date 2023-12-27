@@ -9,10 +9,15 @@ class ProductsController < ApplicationController
   def index
     locale = request.headers["Accept-Language"]  || I18n.locale
 
+    show_inactive = params[:show_inactive] === "true"
+
     Mobility.with_locale(locale) do
       products = []
       Product.all.map do |product|
-        products.push(get_product(product.id, locale))
+        product = get_product(product.id, locale, show_inactive)
+        next if product.nil?
+
+        products.push(product)
       end
 
       render :json => products.to_json(methods: [:price_as_float])
@@ -21,7 +26,7 @@ class ProductsController < ApplicationController
 
   def show
     locale = request.headers["Accept-Language"]  || I18n.locale
-    render :json => get_product(params[:id], locale)
+    render :json => get_product(params[:id], locale, true)
   end
 
   def create
@@ -72,10 +77,10 @@ class ProductsController < ApplicationController
 
     result.each do |row|
       product_id = row['translatable_id']
-      product = get_product(product_id, locale)
+      product = get_product(product_id, locale, true)
       next if product.nil?
 
-      products.push(get_product(product_id, locale))
+      products.push(product)
     end
 
     render :json => products.to_json

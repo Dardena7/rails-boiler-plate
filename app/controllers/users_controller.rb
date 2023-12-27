@@ -13,7 +13,7 @@ class UsersController < ApplicationController
     return render :json => {success: false, errors: ["Not authorized"]} unless can_access(params[:id])
 
     user = User.find_by(auth0_id: params[:id])
-    render :json => user.to_json
+    render :json => user.to_json(:include => [:addresses])
   end
 
   def create

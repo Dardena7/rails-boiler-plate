@@ -8,15 +8,17 @@ class CategoriesController < ApplicationController
 
   def index
     locale = request.headers["Accept-Language"]  || I18n.locale
+    show_inactive = params[:show_inactive] === "true"
 
     Mobility.with_locale(locale) do
-      categories = Category.all
+      categories = show_inactive ? Category.all : Category.active.all
       render :json => categories.to_json
     end
   end
 
   def show
     locale = request.headers["Accept-Language"]  || I18n.locale
+    show_inactive_products = params[:show_inactive_products] === "true"
 
     Mobility.with_locale(locale) do
       category = Category.find(params[:id])
@@ -24,7 +26,9 @@ class CategoriesController < ApplicationController
       images = get_images(category)
       products = []
       category.products.map do |product| 
-        products.push(get_product(product, locale)) 
+        product = get_product(product.id, locale, show_inactive_products)
+        next if product.nil?
+        products.push(product) 
       end
 
       render :json => category.as_json().merge(translations: translations, images: images, products: products)

@@ -1,9 +1,9 @@
 module ObjectsUtils
   extend ActiveSupport::Concern
 
-  def get_product(id, locale)
+  def get_product(id, locale, show_inactive = false)
     Mobility.with_locale(locale) do
-      product = Product.find_by_id(id)
+      product = show_inactive ? Product.find_by_id(id) : Product.active.find_by_id(id);
       return nil if product.nil? 
 
       translations = get_translations(product)
@@ -14,13 +14,13 @@ module ObjectsUtils
 
   def get_cart_items(cart, locale)
     cart.cart_items.includes(:product).map do |cart_item|
-      cart_item.as_json.merge(product: get_product(cart_item.product.id, locale))
+      cart_item.as_json.merge(product: get_product(cart_item.product.id, locale, true))
     end
   end
 
   def get_order_items(order, locale)
     order.order_items.includes(:product).map do |order_item|
-      order_item.as_json.merge(product: get_product(order_item.product.id, locale))
+      order_item.as_json.merge(product: get_product(order_item.product.id, locale, true))
     end
   end
 

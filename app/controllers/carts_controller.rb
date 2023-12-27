@@ -8,7 +8,6 @@ class CartsController < ApplicationController
   def index
     locale = request.headers["Accept-Language"]  || I18n.locale
     cart = get_user_cart()
-    #$$alex todo calculate final price if param present
     render :json => cart.as_json().merge(cart_items: get_cart_items(cart, locale))
   end
 

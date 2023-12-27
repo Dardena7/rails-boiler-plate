@@ -12,6 +12,7 @@ class Cart < ApplicationRecord
     cart_item.quantity ||= 0
     cart_item.quantity += quantity
     cart_item.save
+    update_total()
   end
 
   def update_quantity(product, new_quantity)
@@ -22,6 +23,7 @@ class Cart < ApplicationRecord
     cart_item = cart_items.find_by(product: product)
     if cart_item
       cart_item.update(quantity: new_quantity)
+      update_total()
       true
     else
       false
@@ -32,14 +34,33 @@ class Cart < ApplicationRecord
     cart_item = cart_items.find_by(product: product)
     if cart_item
       cart_item.destroy
+      update_total()
       true
     else
       false
     end
   end
 
-  def calculate_total
+  def update_total
     new_total = cart_items.sum { |item| item.total }
     update(total: new_total)
+  end
+
+  def verify
+    errors = {product_inactive: false, total_changed: false}
+    current_total = total
+
+    cart_items.each do |cart_item|
+      product = cart_item.product
+      errors[:product_inactive] = true if !product.active
+      cart_item.save
+    end
+    
+    update_total()
+
+    new_total = total
+    errors[:total_changed] = true if current_total != new_total
+
+    return errors
   end
 end

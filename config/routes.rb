@@ -22,6 +22,8 @@ Rails.application.routes.draw do
 
   get "orders/order_confirmation", to: "orders#order_confirmation", as: "order_confirmation"
   resources :orders, only: [:index, :show, :create]
+
+  resources :addresses, only: [:create, :update, :destroy]
   
   post "/files", to: "files#create"
 end
