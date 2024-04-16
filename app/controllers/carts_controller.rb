@@ -8,7 +8,7 @@ class CartsController < ApplicationController
   def index
     locale = request.headers["Accept-Language"]  || I18n.locale
     cart = get_user_cart()
-    render :json => cart.as_json().merge(cart_items: get_cart_items(cart, locale))
+    render :json => cart.as_json().merge(cart_items: get_cart_items(cart, locale), total: cart.total)
   end
 
   def add_to_cart

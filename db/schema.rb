@@ -57,7 +57,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_11_26_121233) do
     t.integer "quantity"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.decimal "total", precision: 10, scale: 2, default: "0.0"
     t.index ["cart_id"], name: "index_cart_items_on_cart_id"
     t.index ["product_id"], name: "index_cart_items_on_product_id"
   end
@@ -66,7 +65,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_11_26_121233) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.decimal "total", precision: 10, scale: 2, default: "0.0"
     t.string "uuid"
     t.boolean "completed", default: false
     t.index ["user_id"], name: "index_carts_on_user_id"

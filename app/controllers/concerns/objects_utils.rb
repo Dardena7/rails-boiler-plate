@@ -14,7 +14,7 @@ module ObjectsUtils
 
   def get_cart_items(cart, locale)
     cart.cart_items.includes(:product).map do |cart_item|
-      cart_item.as_json.merge(product: get_product(cart_item.product.id, locale, true))
+      cart_item.as_json.merge(product: get_product(cart_item.product.id, locale, true), total: cart_item.total)
     end
   end
 
