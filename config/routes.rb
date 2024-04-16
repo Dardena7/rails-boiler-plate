@@ -17,7 +17,6 @@ Rails.application.routes.draw do
   patch "carts/add_to_cart", to: "carts#add_to_cart", as: "add_product_to_cart"
   patch "carts/update_quantity", to: "carts#update_quantity", as: "update_product_quantity"
   patch "carts/remove_from_cart", to: "carts#remove_from_cart", as: "remove_product_from_cart"
-  patch "carts/merge_cart", to: "carts#merge_cart", as: "merge_products_to_cart"
   resources :carts
 
   get "orders/order_confirmation", to: "orders#order_confirmation", as: "order_confirmation"
