@@ -1,7 +1,7 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Rails boiler plate api for an shop application.
+Using Mobility for translations and auth0 for authentication.
 
 ## Auth0 initialization
 
