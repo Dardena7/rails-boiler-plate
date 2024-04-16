@@ -18,7 +18,7 @@ class UsersController < ApplicationController
 
   def create
     if can_create(request.headers['Authorization'])
-      handle_user_creation(params[:params][:user])
+      handle_user_creation(params[:user])
     else 
       render :json => {success: false, errors: ["Not authorized"]}.to_json
     end
@@ -54,6 +54,10 @@ class UsersController < ApplicationController
   end
 
   def handle_user_creation(params)
+    if User.find_by(auth0_id: params[:user_id]).present? 
+      return render :json => {success: false, errors: ["User already exists"]}.to_json 
+    end
+
     user = User.new({auth0_id: params[:user_id], email: params[:email]})
 
     if user.save
