@@ -11,8 +11,8 @@ class Order < ApplicationRecord
     cart.cart_items.each do |cart_item|
       product = cart_item.product
       quantity = cart_item.quantity
-      price = cart_item.product.price
-      total = cart_item.total
+      price = product.price
+      total = quantity * price
       order_items.create(product: product, price: price, quantity: quantity, total: total)
     end
   end

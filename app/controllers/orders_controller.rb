@@ -36,14 +36,15 @@ class OrdersController < ApplicationController
     address = Address.create(permitted_params[:address])
     cart = Cart.find(permitted_params[:cart_id])
     user = get_user()
+    total = permitted_params[:total]
 
-    errors = cart.verify()
+    errors = cart.verify_cart_total(total)
     return render :json => {success: false, errors: errors}.to_json, status: :unprocessable_entity if errors[:product_inactive] || errors[:total_changed]
 
     cart.update(completed: true)
     email = user.present? ? user.email : permitted_params[:email]
 
-    order = Order.create(cart: cart, user: user, email: email, address: address, total: cart.total)
+    order = Order.create(cart: cart, user: user, email: email, address: address, total: total)
     order.create_order_items()
 
     render :json => {success: true, order: order}.to_json
@@ -56,7 +57,7 @@ class OrdersController < ApplicationController
   end
 
   def order_params(params)
-    params.permit(:cart_id, :email, address: [:complete_name, :city, :street, :country, :zip])
+    params.permit(:cart_id, :email, :total, address: [:complete_name, :city, :street, :country, :zip])
   end
 
   def get_user
