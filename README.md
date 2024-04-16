@@ -1,6 +1,6 @@
 # README
 
-Rails boiler plate api for an shop application.
+Rails API boiler plate for a shop application.
 Using Mobility for translations and auth0 for authentication.
 
 ## Auth0 initialization
